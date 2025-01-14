@@ -66,11 +66,13 @@ This is the main section in our tutorial. Here, we will learn how to code a cust
 
 ##### 3.1. Repository Setup
 
-The first step is to create a Github repository that will contain our WebApp code. Tercen provides a template for that [IMG].
+The first step is to create a Github repository that will contain our WebApp code. Tercen provides a template for that. Select the <code>tercen/webapp_template</code> template, set the new repository to public and click on <code>Create repository</code>
 <p>
-<img src="imgs/003_RepoCreate.png" alt="drawing" width="500" title="Somethin"/></br>
-<em>something</em>
+<img src="imgs/003_RepoCreateA.png" alt="drawing" width="500" title="Somethin"/></br>
+<em>Repository creation. Select <code>tercen/webapp_template</code> as the template (1). Although private repositories are supported, for the sake of simplicity, we will create a public one for this tutorial (2).</em>
 </p>
+
+###### 3.1.1. Overview of the WebApp project files
 
 ##### 3.2. Running the Template
 

@@ -13,12 +13,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  kumo_api:
-    git:
-      url: git@github.com:tercen/kumo_api.git
-      ref: 1.0.0
-  
-
 
 
 
