@@ -1,14 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
-
-import 'package:sci_tercen_client/sci_client_service_factory.dart' as tercen;
-import 'package:sci_tercen_client/sci_client.dart' as sci;
-import 'package:uuid/uuid.dart';
 
 import 'package:webapp_model/id_element.dart';
-import 'package:webapp_model/id_element_table.dart';
 import 'package:webapp_model/webapp_data_base.dart';
 import 'package:webapp_template/service/project.dart';
 import 'package:webapp_template/service/user.dart';
