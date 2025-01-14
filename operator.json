@@ -17,5 +17,5 @@
     "properties": [
   
     ],
-    "auth": ["google"]
+    "auth": ["basic"]
   }

@@ -64,17 +64,59 @@ A second solution is to develop an UI handles a lot of functionality "behid the 
 
 This is the main section in our tutorial. Here, we will learn how to code a custom UI to run the steps described in section 2.
 
+**NOTE:** This tutorial assumes that the Flutter SDK is correctly installed.
+
+**NOTE 2:** We use VS Code as the development environment in this tutorial. 
+
 ##### 3.1. Repository Setup
 
-The first step is to create a Github repository that will contain our WebApp code. Tercen provides a template for that. Select the <code>tercen/webapp_template</code> template, set the new repository to public and click on <code>Create repository</code>
+The first step is to create a Github repository that will contain our WebApp code. Tercen provides a template for that. Select the <code>tercen/webapp_template</code> template, set the new repository to public and click on <code>Create repository</code>.
 <p>
 <img src="imgs/003_RepoCreateA.png" alt="drawing" width="500" title="Somethin"/></br>
 <em>Repository creation. Select <code>tercen/webapp_template</code> as the template (1). Although private repositories are supported, for the sake of simplicity, we will create a public one for this tutorial (2).</em>
 </p>
 
+Next, clone the project and in its root project run <code>flutter pub get</code> to ensure that all dependencies are satisfied.
+
 ###### 3.1.1. Overview of the WebApp project files
 
-##### 3.2. Running the Template
+The project comes with a number of folders and files that we will become familiar as the tutorial goes on. For now, it suffices to know that we will create our screens under the <code>lib/screens</code> folder and register them in the <code>main.dart</code> file. 
+
+<p>
+<img src="imgs/004_Files.png" alt="drawing" width="300" title="Somethin"/></br>
+<em>File structure of a recently created WebApp project.</em>
+</p>
+
+###### 3.1.2. Tercen Components
+
+Tercen provides a [webapp development library](https://github.com/tercen/webapp_lib). It contains a number of functions to interact with Workflows, Projects and Users. It also wraps commonly used Widget in what we call **Components**.
+
+**Components** have two main roles:
+1. Provide reusable code so it becomes easy to add Widgets like text input or tables to your screens.
+
+2. Integrates these Widgets with the overall WebApp architecture, automatically handling layout placement, state saving and providing a framework for interaction with the data layer.
+
+
+##### 3.2. Running the WebApp
+
+Before developing our code, let's first see how do we run our WebApp. 
+
+###### 3.2.1 Running from the Library
+
+The standard method of running a WebApp is by pressing the **Run** button after installing the WebApp in the library. Before doing that, however, we need to build the project.
+
+In the root folder of the project, run the <code>flutter build web</code> command. One this is done, go into the **build/web** folder and open the <code>index.html</code>. Remove the <code>\<base href="/"\></code> line. This line interferes with how Tercen serves up WebApp pages, so if it is not removed, your WebApp will not be displayed.
+
+<p>
+<img src="imgs/006_indexA.png" alt="drawing" width="450" title="Somethin"/></br>
+<em>Line to be removed before commiting the build to Github.</em>
+</p>
+
+Push the build changes to Github and install the WebApp as you would install any operator (REF To dev guide).
+
+
+
+
 
 ##### 3.3. The Upload Data Screen
 
