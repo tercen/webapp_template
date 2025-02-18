@@ -8,7 +8,7 @@ This tutorial will guide in the creation of your first WebApp: the **UMAP report
 
 ##### 1.1. Library Requirements
 
-A detailed overview on how to import <code>Workflow</code> GitHub repositories is described in [this video](https://www.youtube.com/watch?v=JaFlgRekJP8). In this tutorial, we will need to import [the example UMAP workflow, version 0.0.2](https://github.com/tercen/webapp_tutorial_workflow) into our library.
+A detailed overview on how to import <code>Workflow</code> GitHub repositories is described in [this video](https://www.youtube.com/watch?v=JaFlgRekJP8). Briefly, we want to create a **project from Git** in a library team. In this tutorial, we will need to import [the example UMAP workflow, version 0.0.3](https://github.com/tercen/webapp_tutorial_workflow) into our library.
 
 This workflow has 3 main features:
 
@@ -22,15 +22,6 @@ This workflow has 3 main features:
 </p>
 
 Go to the installed project and download the <code>omip69_1k.csv</code> file to a folder of your choice.
-
-##### 1.2. Functionality Overview
-
-Our tutorial use case has three steps:
-
-1. Upload some data
-2. Run UMAP on the data
-3. Download resulting images
-
 
 ### 2. Running the Analysis without WebApp
 
@@ -205,7 +196,7 @@ The WebApp needs a to know how it can access workflow templates from the library
             "iid":"umap_workflow",
             "name":"UMAP Workflow",
             "url":"https://github.com/tercen/webapp_tutorial_workflow",
-            "version":"0.1.0"
+            "version":"0.0.3"
         }
     ]
 }
@@ -268,6 +259,8 @@ _Getting the Input Data_
 We start by grabbing the data we uploaded from the <code>UploadTableComponent</code>. The <code>ScreenBase</code> provides a <code>getComponent</code> method that retrieves a <code>Component</code> based on its ID. Since we can upload multiple files at once, our component is a <code>MultiValueComponent</code>.
 
 ```dart
+openDialog(context);
+log("Running Workflow, please wait.");
 var filesComponent = getComponent("uploadComp", groupId: getScreenId()) as MultiValueComponent;
 
 var uploadedFiles = filesComponent.getValue();
@@ -277,31 +270,36 @@ for( var uploadedFile in uploadedFiles ){
     
     // ...
 }
+closeLog();
 ```
 
 The <code>getValue</code> function returns a list of <code>IdElement</code> objects, containing the uploaded files' id and name.
 
 _Configuring the WorkflowRunner_
 
-We create the <code>WorkflowRunner</code> object by passing the project ID, owner Id and the <code>Workflow</code> iid, as described in the <code>repos.json</code> file.
+Add the following code inside the for loop we just created. 
 
 ```dart
 WorkflowRunner runner = WorkflowRunner(
         widget.modelLayer.project.id,
         widget.modelLayer.teamname.id,
-        widget.modelLayer.getWorkflow("umap"));
-```
+        widget.modelLayer.getWorkflow("umap_workflow"));
 
-We must link the ID of the files we updated to the <code>TableStep</code> of the <code>Workflow</code>.
+runner.addTableDocument("f4d5e14a-6d75-4d44-ad77-7ae106bd9fb0", uploadedFile.id);
+
+runner.addPostRun( widget.modelLayer.reloadProjectFiles );
+await runner.doRun(context);
+```
+We create the <code>WorkflowRunner</code> object by passing the project ID, owner Id and the <code>Workflow</code> iid, as described in the <code>repos.json</code> file. Then we link the id of the table we uploaded to the <code>TableStep</code> of the <code>Workflow</code>. Finally, we tell the WebApp to refresh the cached list of project files once we are done. 
+
+Then, we tell the runner to execute the <code>Workflow</code> with the given configuration.
 
 
 ##### 3.4. The Report Screen
 
-After running the <code>Workflow</code> we are going to access its output to build a report screen.
+After running the <code>Workflow</code> we are going to access its output to build a report screen. Go ahead and create  new, empty screen. 
 
-
-We will use a two components in the report screen, one to select the images, and one to visualize and download them.
-
+We will use two components in the report screen, one to select the images, and one to visualize and download them.
 
 ```dart
   var imageSelectComponent = LeafSelectableListComponent("imageSelect", getScreenId(), "Analyses List", ["workflow", "image"], _fetchWorkflows, multi: true);
@@ -314,7 +312,6 @@ We will use a two components in the report screen, one to select the images, and
 ```
 
 The <code>imageSelectComponent</code> provides a list of plot steps, grouped by <code>Workflow</code>. It requires **fetch** function to build the list.
-
 
 
 ```dart
@@ -341,12 +338,23 @@ Future<IdElementTable> _fetchWorkflows( List<String> parentKeys, String groupId 
 
 The <code>_fetchWorkflows</code> is callback to a function which access whatever data layer our WebApp has. It can be a function which searches the project files, access a remote API or otehr similar functions. In our case, we want to search our project for <code>Workflows</code> that we have previously ran. We then build a <code>IdElementTable</code> with two columns, one with the workflow information, the other with the plot step information.
 
+<code>plotStepIds</code> is simply a list of <code>DataSteps</code> which plot something. It is specific to the template we use. For the tutorial, add the list below as a class member in the screen state.
+
+```dart
+class _ReportScreenState extends State<ReportScreen>
+    with ScreenBase, ProgressDialog {
+  
+  final List<String> plotStepIds = ["7aa6de32-4e47-4f25-bbca-c297c546247f", "ed6a57dd-34c6-4963-9f13-a3dac9481fc2"];
+
+  // ... Remainder of the class
+```
+
 >NOTES
 >* <code>IdElementTable</code> is a utility class which holds multiple <code>List<IdElement></code>.
 >* <code>IdElement</code> itself is an utility class that holds an id and a label, both <code>String</code> objects.
 >* <code>tercen.ServiceFactory</code> provides access to Tercen's API functions.
 
-<code>mmm</code> fetches the byte data for the images the user selected from the workflow list.
+<code>_fetchWorkflowImages</code> fetches the byte data for the images the user selected from the workflow list.
 
 ```dart
 Future<IdElementTable> _fetchWorkflowImages(List<String> parentKeys, String groupId) async {
@@ -367,10 +375,18 @@ app.addNavigationPage(
 That's all. Rebuild and deploy the project. 
 
 
-##### 4. What's next
+##### 4. Conclusion
 
 In this tutorial, we covered the basics of writing a WebApp that extends Tercen's capability to create custom interactions with Workflows and Data. We used Tercen's <code>WebAppLib</code> to quickly add common UI components to our screens. 
 
-All parts of a <code>WebApp</code> and the <code>WebAppLib</code> were designed to allow them to be extended or even replaced by custom behaviors.
+We have also covered the basics of the <code>WorfklowRunner</code> class. However, if offers advanced configuration capabilities, such as communicating with <code>Operator</code> settings, removing steps or making partial runs of <code>Worfklows</code>. 
+
+Finally, all parts of a <code>WebApp</code> and the <code>WebAppLib</code> were designed to allow them to be extended or even replaced by custom behaviors.
+
+
+
+
+
+
 
 
