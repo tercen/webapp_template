@@ -96,6 +96,48 @@ In the root folder of the project, run the <code>flutter build web</code> comman
 
 Push the build changes to Github and install the WebApp as you would install any operator.
 
+###### 3.2.1. Running the WebApp from VS-Code
+
+Testing a deployed version of your WebApp is the best way to ensure all its functionalities work as expected. However, it is also possible to run your WebApp directly from VS-Code, without synchronizing with GitHub.  
+
+_Requirements_
+
+To run a WebApp from VSCode, we need a local running instance of Tercen. The procedure to do so is described [here](https://tercen.github.io/developers_guide/setting-up-tercen-studio.html).
+
+
+_Project Setup_
+
+Now create an empty workflow in a project. You can create it in any project and even change project later. Once you have the workflow, do these steps in order.
+
+1. Create a <code>TableStep</code>. When you are asked about the data, press <code>Cancel</code>.
+
+2. Create a <code>DataStep</code> linked to the previous Step. Set you WebApp as the operator.
+
+3. In the tab to the right of Settings, set the value of <code>webapp.uri</code> to http://127.0.0.1:12888
+
+4. Delete the <code>TableStep</code> and save the workflow.
+
+You will end up with a workflow consisting of a single <code>DataStep</code>.
+
+_Running Within VS-Code_
+
+Back in our WebApp project within VSCode, we need to tell flutter to run our WebAbb and serve it in the URL in just passed to Tercen, in the project we created. In a terminal, run the following command:
+
+```bash 
+flutter run  --web-hostname 127.0.0.1 --web-port 12888 -d web-server \
+    --dart-define PROJECT_ID=YOUR_PROJECT_ID
+```
+
+Once it is running, you can go back to the workflwo we previously created and run the <code>DataStep</code>. Tercen will look for the WebbApp in the <code>webapp.uri</code> we previously defined. 
+
+_Remarks_
+
+Running your WebApp this way is a great way to iterate changes faster, as you gain access to hot-relaoding and doesn't need to rebuild and sync your code to see code changes.
+
+The downside, however, is that the WebApp runs within an iframe. Layout and some functions might run slightly different to deal with CORS features. It is important to periodically test the deployed version to ensure it behaves as expected.
+
+
+
 ##### 3.3. The Upload Data Screen
 
 _The Upload Screen Screen_
@@ -103,7 +145,17 @@ _The Upload Screen Screen_
 The first functionality we want to add to our Web App is the ability to upload tables into our project using a Tercen component. Let's create a file called <code>lib/screens/upload_data_screen.dart</code> containing the code from <code>base_screen_snippet.dart</code>. 
 
 ```dart
-// [...] Imports
+import 'package:flutter/material.dart';
+
+import 'package:webapp_components/screens/screen_base.dart';
+import 'package:webapp_components/action_components/button_component.dart';
+import 'package:webapp_components/components/upload_table_component.dart';
+import 'package:webapp_template/webapp_data.dart';
+import 'package:webapp_model/webapp_data_base.dart';
+
+import 'package:webapp_ui_commons/mixin/progress_log.dart';
+import 'package:webapp_components/abstract/multi_value_component.dart';
+import 'package:webapp_workflow/runners/workflow_runner.dart';
 
 
 class UploadDataScreen extends StatefulWidget {
@@ -290,7 +342,13 @@ runner.addTableDocument("f4d5e14a-6d75-4d44-ad77-7ae106bd9fb0", uploadedFile.id)
 runner.addPostRun( widget.modelLayer.reloadProjectFiles );
 await runner.doRun(context);
 ```
-We create the <code>WorkflowRunner</code> object by passing the project ID, owner Id and the <code>Workflow</code> iid, as described in the <code>repos.json</code> file. Then we link the id of the table we uploaded to the <code>TableStep</code> of the <code>Workflow</code>. Finally, we tell the WebApp to refresh the cached list of project files once we are done. 
+We create the <code>WorkflowRunner</code> object by passing the project ID, owner Id and the <code>Workflow</code> iid, as described in the <code>repos.json</code> file. In the <code>runner.addTableDocument</code> call, we link the id of the table we uploaded to the <code>TableStep</code> of the <code>Workflow</code>. This ID (the first argument of the call) can be obtained by opening the tempalte, double-clicking the tabel step and checking the URL. Finally, we tell the WebApp to refresh the cached list of project files once we are done. 
+
+<p>
+<img src="imgs/008_stepId.png" alt="drawing" width="800" title="Somethin"/></br>
+<em>Finding the ID of a workflow step.</em>
+</p>
+
 
 Then, we tell the runner to execute the <code>Workflow</code> with the given configuration.
 
@@ -302,11 +360,13 @@ After running the <code>Workflow</code> we are going to access its output to bui
 We will use two components in the report screen, one to select the images, and one to visualize and download them.
 
 ```dart
-  var imageSelectComponent = LeafSelectableListComponent("imageSelect", getScreenId(), "Analyses List", ["workflow", "image"], _fetchWorkflows, multi: true);
+  var imageSelectComponent = LeafSelectableListComponent("imageSelect", getScreenId(), 
+     "Analyses List", ["workflow", "image"], _fetchWorkflows, multi: true);
   addComponent("default", imageSelectComponent);
 
 
-  var imageListComponent = ImageListComponent("imageList", getScreenId(), "Images",  _fetchWorkflowImages );
+  var imageListComponent = ImageListComponent("imageList", getScreenId(), 
+      "Images",  _fetchWorkflowImages );
   imageListComponent.addParent(imageSelectComponent);
   addComponent("default", imageListComponent);
 ```
@@ -344,7 +404,8 @@ The <code>_fetchWorkflows</code> is callback to a function which access whatever
 class _ReportScreenState extends State<ReportScreen>
     with ScreenBase, ProgressDialog {
   
-  final List<String> plotStepIds = ["7aa6de32-4e47-4f25-bbca-c297c546247f", "ed6a57dd-34c6-4963-9f13-a3dac9481fc2"];
+  final List<String> plotStepIds = ["7aa6de32-4e47-4f25-bbca-c297c546247f", 
+    "ed6a57dd-34c6-4963-9f13-a3dac9481fc2"];
 
   // ... Remainder of the class
 ```
