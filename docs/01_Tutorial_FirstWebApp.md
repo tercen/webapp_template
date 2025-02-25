@@ -226,8 +226,8 @@ class _UploadDataScreenState extends State<UploadDataScreen>
 Then, we insert the components we want to see on our screen. In this case, we simply need the <code>UploadTableComponent</code>.
 
 ```dart
-    var uploadComponent = UploadTableComponent("uploadComp", getScreenId(), "Upload Files", 
-          widget.modelLayer.app.projectId, widget.modelLayer.app.teamname);
+    var uploadComponent = UploadTableComponent("uploadComp", getScreenId(), 
+      "Upload Files", widget.modelLayer.app.projectId, widget.modelLayer.app.teamname);
 
 
     addComponent("default", uploadComponent);
@@ -333,7 +333,8 @@ We start by grabbing the data we uploaded from the <code>UploadTableComponent</c
 ```dart
 openDialog(context);
 log("Running Workflow, please wait.");
-var filesComponent = getComponent("uploadComp", groupId: getScreenId()) as MultiValueComponent;
+var filesComponent = getComponent("uploadComp", groupId: getScreenId()) 
+      as MultiValueComponent;
 
 var uploadedFiles = filesComponent.getValue();
 
@@ -395,8 +396,10 @@ The <code>imageSelectComponent</code> provides a list of plot steps, grouped by 
 
 
 ```dart
-Future<IdElementTable> _fetchWorkflows( List<String> parentKeys, String groupId ) async {
-  var workflows = await widget.modelLayer.fetchProjectWorkflows(widget.modelLayer.project.id);
+Future<IdElementTable> _fetchWorkflows( List<String> parentKeys, String groupId )
+       async {
+  var workflows = await widget.modelLayer.fetchProjectWorkflows(
+        widget.modelLayer.project.id);
 
   List<IdElement> workflowCol = [];
   List<IdElement> imageCol = [];
@@ -438,7 +441,8 @@ class _ReportScreenState extends State<ReportScreen>
 <code>_fetchWorkflowImages</code> fetches the byte data for the images the user selected from the workflow list.
 
 ```dart
-Future<IdElementTable> _fetchWorkflowImages(List<String> parentKeys, String groupId) async {
+Future<IdElementTable> _fetchWorkflowImages(List<String> parentKeys, String groupId)
+     async {
   var comp = getComponent("imageSelect") as LeafSelectableListComponent;
   var selectedTable = comp.getValueAsTable();
 
