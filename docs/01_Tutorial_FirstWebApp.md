@@ -4,6 +4,26 @@ WebApp are bespoke user interfaces built on top of Tercen's flexible analysis ca
 
 This tutorial will guide in the creation of your first WebApp: the **UMAP report app**. We will start by covering the use case, briefly how this is achieved typically in Tercen and how the WebApp can change the way the user interacts with Tercen.
 
+#### SUMMARY 
+
+* [1. Tutorial Overview](#1-tutorial-overview)  
+  * [1.1. Library Requirements](#11-library-requirements)  
+* [2. Running the Analysis Without the WebApp](#2-running-the-analysis-without-webapp)
+  * [2.1. Scaling](#21-scaling)
+* [3. Developing a WebApp](#3-developing-a-webapp)  
+  * [3.1. Repository Setup](#31-repository-setup)
+    * [3.1.1. Overview of the WebApp Project Files](#311-overview-of-the-webapp-project-files)
+    * [3.1.2. Tercen Components](#312-tercen-components)
+  * [3.2. Running the WebApp](#32-running-the-webapp)
+    * [3.2.1. Running the WebApp from VSCode](#321-running-the-webapp-from-vs-code)
+  * [3.3. The Upload Data Screeb](#33-the-upload-data-screen)
+    * [3.3.1. Linking a WebApp to a Workflow Template](#331-linking-a-webapp-to-a-workflow-template)
+    * [3.3.2. Adding the ActionComponent](#332-adding-the-actioncomponent)
+    * [3.3.3. The WorkflowRunner](#333-the-workflowrunner)
+  * [3.4. The Report Screen](#34-the-report-screen)
+* [4. Conclusion](#4-conclusion)
+
+
 ### 1. Tutorial Overview
 
 ##### 1.1. Library Requirements
