@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 
-import 'package:webapp_components/abstract/single_value_component.dart';
 import 'package:webapp_components/action_components/button_component.dart';
 import 'package:webapp_components/components/input_text_component.dart';
 import 'package:webapp_components/components/select_from_list.dart';
 import 'package:webapp_components/screens/screen_base.dart';
-import 'package:webapp_model/id_element.dart';
+import 'package:webapp_components/validators/null_validator.dart';
+
 import 'package:webapp_model/webapp_data_base.dart';
 import 'package:webapp_template/webapp_data.dart';
 import 'package:webapp_ui_commons/mixin/progress_log.dart';
@@ -43,17 +43,20 @@ class _ProjectScreenState extends State<ProjectScreen>
   void initState() {
     super.initState();
 
-    var project = widget.modelLayer.project;
-
-    var projectInputComponent =
-        InputTextComponent("project", getScreenId(), "Project Name");
-    projectInputComponent.setData(project.label);
-    // projectInputComponent.onChange(checkRun);
+    var projectInputComponent = InputTextComponent(
+        "project", getScreenId(), "Project Name",
+        saveState: false);
+    projectInputComponent.setComponentValue(widget.modelLayer.app.projectName);
     projectInputComponent.onChange(refresh);
+    projectInputComponent.addValidator(
+        NullValidator(invalidMessage: "Project Name cannot be empty"));
 
     var selectTeamComponent = SelectFromListComponent(
         "team", getScreenId(), "Select Team",
-        user: widget.modelLayer.app.teamname);
+        user: widget.modelLayer.app.teamname, saveState: false);
+    selectTeamComponent.setComponentValue(widget.modelLayer.app.teamname);
+    selectTeamComponent
+        .addValidator(NullValidator(invalidMessage: "Team cannot be empty"));
 
     addComponent("default", projectInputComponent);
     addComponent("default", selectTeamComponent);
@@ -69,16 +72,17 @@ class _ProjectScreenState extends State<ProjectScreen>
     openDialog(context);
     log("Creating/Loading Project", dialogTitle: "Create Project");
 
-    SingleValueComponent teamComponent =
-        getComponent("team") as SingleValueComponent;
-    var selectedTeam = teamComponent.getValue().label;
+    var teamComponent = getComponent("team") as SelectFromListComponent;
+    var selectedTeam = teamComponent.getComponentValue();
 
-    SingleValueComponent projectComponent =
-        getComponent("project") as SingleValueComponent;
-    var projectName = projectComponent.getValue().label;
+    var projectComponent = getComponent("project") as InputTextComponent;
+    var projectName = projectComponent.getComponentValue();
 
-    await widget.modelLayer
-        .createOrLoadProject(IdElement("", projectName), selectedTeam);
+    if (projectName != widget.modelLayer.app.projectName) {
+      await widget.modelLayer
+          .createOrLoadProject("", projectName, selectedTeam);
+      await modelLayer.reloadProjectFiles();
+    }
     closeLog();
   }
 

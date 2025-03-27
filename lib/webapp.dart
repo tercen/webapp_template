@@ -1,5 +1,4 @@
-import 'package:sci_tercen_client/sci_client.dart' as sci;
-import 'package:sci_tercen_client/sci_client_service_factory.dart' as tercen;
+
 
 import 'package:webapp_ui_commons/webapp_base.dart';
 

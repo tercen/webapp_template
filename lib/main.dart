@@ -1,32 +1,33 @@
 import 'dart:async';
+
 import 'dart:io';
 
 import 'package:webapp_template/globals.dart' as globals;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:json_string/json_string.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webapp_template/screens/project_screen.dart';
+
 import 'package:webapp_template/webapp.dart';
 import 'package:webapp_template/webapp_data.dart';
+
 import 'package:webapp_ui_commons/mixin/progress_log.dart';
+import 'package:webapp_ui_commons/styles/default_style.dart';
 import 'package:webapp_ui_commons/styles/styles.dart';
 
 import 'package:sci_tercen_client/sci_client.dart' as sci;
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-//Prevents multiple error screens overwriting one another
-// bool isShowingGlobalError = false;
 void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
-
-
 
       runApp(MaterialApp(
         home: const KumoAnalysisApp(),
@@ -48,6 +49,9 @@ void main() async {
               context: navigatorKey.currentContext!,
               builder: (context) => errorHandler.build(context));
 
+        }else{
+          print(error);
+          print(stackTrace);
         }
       } else {
         print("Context or null check error");
@@ -79,9 +83,9 @@ class _TwoColumnHomeState extends State<TwoColumnHome> with ProgressDialog {
   late final WebApp app;
   late final WebAppData appData;
 
-  late final Image logo;
+  late final Widget logo;
 
-
+  bool initStateFinished = false;
   @override
   initState() {
     
@@ -98,33 +102,38 @@ class _TwoColumnHomeState extends State<TwoColumnHome> with ProgressDialog {
           dialogTitle: "WebApp");
 
       await app.init();
-
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
       log("Initializing File Structure",
           dialogTitle: "WebApp");
 
-      // var workflowSettingsFiles = [
-      //   "assets/umap_settings.json"
-      // ];
-
+      Styles().init([DefaultStyle()]);
       
       var img = await rootBundle.load("assets/img/logo.png");
       var bData = img.buffer.asUint8List();
-      logo = Image.memory(bData, width: 380,
-            height: 100);
+      logo = Padding(padding: const EdgeInsets.fromLTRB(0, 0, 50, 20), child:   Image.memory(bData, width: 228,
+            height: 60));
 
       // BASIC Initialization
+      // settingFilterFile
       await appData.init(app.projectId, app.projectName, app.username);
+
+      app.navMenu.project = app.projectName;
+      app.navMenu.user = app.username;
+      app.navMenu.team = app.teamname;
+      app.navMenu.webApp = "${packageInfo.appName.replaceAll("_", " ")} (${packageInfo.version})";
 
       //OR Advanced initialization with configuration files
       // await appData.init(app.projectId, app.projectName, app.username,
-      //     reposJsonPath: "assets/repos.json",
-      //     stepMapperJsonFile: "assets/workflow_steps.json",
-      //     settingFiles: workflowSettingsFiles);
+          // reposJsonPath: "assets/repos.json",
+          // settingFilterFile: "assets/settings_screen_filter.json",
+          // stepMapperJsonFile: "assets/workflow_steps.json");
+
+      // 
 
       app.addNavigationPage(
-          "Project", ProjectScreen(appData, key: app.getKey("Project")));
-
+          "Project", ProjectScreen(appData, key: app.getKey("Upload")));
+      
 
 
       appData.addListener(refresh);
@@ -132,31 +141,27 @@ class _TwoColumnHomeState extends State<TwoColumnHome> with ProgressDialog {
 
       // await app.postInit();
       app.isInitialized = true;
+      initStateFinished = true;
       refresh();
       
       closeLog();
     });
   }
 
+
   void refresh() {
     setState(() {});
   }
 
 
+
   Widget _buildBanner() {
     return Column(
       children: [
-        Center(
+        Align(
+          alignment: Alignment.topLeft,
           child: logo,
         ),
-        Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              appData.project.label != ""
-                  ? "Project Name: ${appData.project.label}"
-                  : "No project associated",
-              style: Styles.textGray,
-            )),
         Container(
           height: 1,
           color: const Color.fromARGB(255, 230, 230, 230),
@@ -167,7 +172,7 @@ class _TwoColumnHomeState extends State<TwoColumnHome> with ProgressDialog {
 
   @override
   Widget build(BuildContext context) {
-    if (app.isInitialized) {
+    if (initStateFinished) {
       var bannerWdg = _buildBanner();
       app.banner = bannerWdg;
 
@@ -209,14 +214,14 @@ class ErrorScreen extends StatelessWidget {
         color: Colors.red,
       ),
       backgroundColor: const Color.fromARGB(255, 247, 194, 194),
-      title: const Text(
+      title:  Text(
         "An Unexpected Error Occurred",
-        style: Styles.textH2,
+        style: Styles()["textH2"],
       ),
       content: SingleChildScrollView(
         child: Text(
           errorString,
-          style: Styles.text,
+          style: Styles()["text"],
         ),
       ),
       actions: [
@@ -242,10 +247,10 @@ class ErrorScreen extends StatelessWidget {
 
               launchUrl(tercenLink, webOnlyWindowName: "_self");
             },
-            child: const Center(
+            child: Center(
                 child: Text(
               "Exit",
-              style: Styles.textButton,
+              style: Styles()["textButton"],
             )))
       ],
     );
