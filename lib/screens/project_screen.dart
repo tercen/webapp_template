@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:webapp_components/action_components/button_component.dart';
 import 'package:webapp_components/components/input_text_component.dart';
@@ -62,28 +62,22 @@ class _ProjectScreenState extends State<ProjectScreen>
     addComponent("default", selectTeamComponent);
 
     var createProjectBtn = ButtonActionComponent(
-        "createProject", "Run Analysis", _doCreateProject,
+        "createProject", "Open New WebApp", _openNewWebApp,
         blocking: false, parents: [projectInputComponent, selectTeamComponent]);
     addActionComponent(createProjectBtn);
     initScreen(widget.modelLayer as WebAppDataBase);
   }
 
-  Future<void> _doCreateProject() async {
-    openDialog(context);
-    log("Creating/Loading Project", dialogTitle: "Create Project");
+  Future<void> _openNewWebApp() async {
+    // http://127.0.0.1:5400/thiago.monteiro/p/a76d10aa4a4e198bfaad6c65bc4b4a23?folderId=a76d10aa4a4e198bfaad6c65bc6e0cad
+    var link = Uri(
+        scheme: Uri.base.scheme,
+        host: '127.0.0.1',
+        port: 5400,
+        path:
+            "${widget.modelLayer.app.teamname}/p/${widget.modelLayer.app.projectId}/channel/SOME_TEST_CHANNEL");
 
-    var teamComponent = getComponent("team") as SelectFromListComponent;
-    var selectedTeam = teamComponent.getComponentValue();
-
-    var projectComponent = getComponent("project") as InputTextComponent;
-    var projectName = projectComponent.getComponentValue();
-
-    if (projectName != widget.modelLayer.app.projectName) {
-      await widget.modelLayer
-          .createOrLoadProject("", projectName, selectedTeam);
-      await modelLayer.reloadProjectFiles();
-    }
-    closeLog();
+    launchUrl(link, webOnlyWindowName: "_self");
   }
 
   @override

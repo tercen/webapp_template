@@ -121,7 +121,13 @@ class _TwoColumnHomeState extends State<TwoColumnHome> with ProgressDialog {
       app.navMenu.project = app.projectName;
       app.navMenu.user = app.username;
       app.navMenu.team = app.teamname;
-      app.navMenu.webApp = "${packageInfo.appName.replaceAll("_", " ")} (${packageInfo.version})";
+      var channelName  = Uri.base.queryParameters["channel"] ?? '';
+      if( channelName == ""){
+        app.navMenu.webApp = "${packageInfo.appName.replaceAll("_", " ")} (MAIN)";
+      }else{
+        app.navMenu.webApp = "${packageInfo.appName.replaceAll("_", " ")} (CHANNEL: $channelName)";
+      }
+      
 
       //OR Advanced initialization with configuration files
       // await appData.init(app.projectId, app.projectName, app.username,
